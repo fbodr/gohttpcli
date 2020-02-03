@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "gohttpcli/cmd"
+import "github.com/fbodr/gohttpcli/cmd"
 
 func main() {
 	cmd.Execute()

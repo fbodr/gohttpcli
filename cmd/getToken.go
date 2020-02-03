@@ -16,13 +16,10 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/fbodr/gohttpcli/lib"
 
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"net/http"
-	"strings"
 )
 
 // getTokenCmd represents the getToken command
@@ -43,8 +40,10 @@ var getTokenCmd = &cobra.Command{
 			fmt.Printf("client_secret = %s\n", client_secret)
 			fmt.Printf("audience = %s\n", audience)
 			fmt.Printf("grant_type = %s\n", grant_type)
+			fmt.Println(oauth.GetToken(access_token_url, client_id, client_secret, audience, grant_type, true))
+		} else {
+			fmt.Println(oauth.GetToken(access_token_url, client_id, client_secret, audience, grant_type, false))
 		}
-		make_request(access_token_url, client_id, client_secret, audience, grant_type)
 	},
 }
 
@@ -62,34 +61,4 @@ func init() {
 	getTokenCmd.MarkFlagRequired("client_id")
 	getTokenCmd.MarkFlagRequired("client_secret")
 	getTokenCmd.MarkFlagRequired("audience")
-}
-
-func make_request(access_token_url string, client_id string, client_secret string, audience string, grant_type string) {
-
-	var payload_map map[string]string
-	payload_map = make(map[string]string)
-	payload_map["client_id"] = client_id
-	payload_map["client_secret"] = client_secret
-	payload_map["audience"] = audience
-	payload_map["grant_type"] = grant_type
-	payload, _ := json.Marshal(payload_map)
-
-	auth0_req, err := http.NewRequest("POST", access_token_url, strings.NewReader(string(payload)))
-	if err != nil {
-		panic(err)
-	}
-	auth0_req.Header.Add("content-type", "application/json")
-	auth0_res, err := http.DefaultClient.Do(auth0_req)
-	if err != nil {
-		panic(err)
-	}
-	defer auth0_res.Body.Close()
-	auth0_body, _ := ioutil.ReadAll(auth0_res.Body)
-	var auth0_fields map[string]interface{}
-	err = json.Unmarshal([]byte(auth0_body), &auth0_fields)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(auth0_body))
-
 }

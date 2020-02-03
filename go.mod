@@ -1,4 +1,4 @@
-module gohttpcli
+module github.com/fbodr/gohttpcli
 
 go 1.13
 
