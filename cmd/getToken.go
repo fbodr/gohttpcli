@@ -36,18 +36,19 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		access_token_url, _ :=  cmd.Flags().GetString("access_token_url")
+		access_token_url, _ := cmd.Flags().GetString("access_token_url")
 		client_id, _ := cmd.Flags().GetString("client_id")
 		client_secret, _ := cmd.Flags().GetString("client_secret")
 		audience, _ := cmd.Flags().GetString("audience")
 		grant_type, _ := cmd.Flags().GetString("grant_type")
-
-		/*fmt.Printf("access_token_url = %s\n", access_token_url)
-		fmt.Printf("client_id = %s\n", client_id)
-		fmt.Printf("client_secret = %s\n", client_secret)
-		fmt.Printf("audience = %s\n", audience)
-		fmt.Printf("grant_type = %s\n", grant_type)*/
-
+		verbose, _ := cmd.Flags().GetBool("verbose")
+		if verbose {
+			fmt.Printf("access_token_url = %s\n", access_token_url)
+			fmt.Printf("client_id = %s\n", client_id)
+			fmt.Printf("client_secret = %s\n", client_secret)
+			fmt.Printf("audience = %s\n", audience)
+			fmt.Printf("grant_type = %s\n", grant_type)
+		}
 		make_request(access_token_url, client_id, client_secret, audience, grant_type)
 	},
 }
@@ -60,6 +61,7 @@ func init() {
 	getTokenCmd.Flags().String("client_secret", "", "client_secret")
 	getTokenCmd.Flags().String("audience", "", "audience")
 	getTokenCmd.Flags().String("grant_type", "client_credentials", "grant_type")
+	getTokenCmd.Flags().BoolP("verbose", "v", false, "verbose output")
 
 	getTokenCmd.MarkFlagRequired("access_token_url")
 	getTokenCmd.MarkFlagRequired("client_id")
@@ -71,7 +73,7 @@ func make_request(access_token_url string, client_id string, client_secret strin
 
 	var payload_map map[string]string
 	payload_map = make(map[string]string)
-	payload_map["client_id"] =  client_id
+	payload_map["client_id"] = client_id
 	payload_map["client_secret"] = client_secret
 	payload_map["audience"] = audience
 	payload_map["grant_type"] = grant_type
