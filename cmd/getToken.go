@@ -28,23 +28,23 @@ var getTokenCmd = &cobra.Command{
 	Short: "get an authentication token from oauth provider",
 	Long:  `get an authentication token from oauth provider`,
 	Run: func(cmd *cobra.Command, args []string) {
-		access_token_url := viper.GetString("access_token_url")
-		client_id := viper.GetString("client_id")
-		client_secret := viper.GetString("client_secret")
+		accessTokenUrl := viper.GetString("access_token_url")
+		clientId := viper.GetString("client_id")
+		clientSecret := viper.GetString("client_secret")
 		audience := viper.GetString("audience")
-		grant_type := viper.GetString("grant_type")
+		grantType := viper.GetString("grant_type")
 		printAsJson := false
 
 		if isVerbose {
-			fmt.Printf("access_token_url = %s\n", access_token_url)
-			fmt.Printf("client_id = %s\n", client_id)
-			fmt.Printf("client_secret = %s\n", client_secret)
+			fmt.Printf("access_token_url = %s\n", accessTokenUrl)
+			fmt.Printf("client_id = %s\n", clientId)
+			fmt.Printf("client_secret = %s\n", clientSecret)
 			fmt.Printf("audience = %s\n", audience)
-			fmt.Printf("grant_type = %s\n", grant_type)
+			fmt.Printf("grant_type = %s\n", grantType)
 			printAsJson = true
 		}
 
-		accessToken := lib.GetToken(access_token_url, client_id, client_secret, audience, grant_type, printAsJson)
+		accessToken := lib.GetToken(accessTokenUrl, clientId, clientSecret, audience, grantType, printAsJson)
 		fmt.Println(accessToken)
 
 	},

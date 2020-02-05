@@ -9,46 +9,46 @@ import (
 )
 
 func GetToken(
-	access_token_url string,
-	client_id string,
-	client_secret string,
+	accessTokenUrl string,
+	clientId string,
+	clientSecret string,
 	audience string,
-	grant_type string,
+	grantType string,
 	fullJson bool) string {
 
-	var payload_map map[string]string
-	payload_map = make(map[string]string)
-	payload_map["client_id"] = client_id
-	payload_map["client_secret"] = client_secret
-	payload_map["audience"] = audience
-	payload_map["grant_type"] = grant_type
-	payload, _ := json.Marshal(payload_map)
+	var payloadMap map[string]string
+	payloadMap = make(map[string]string)
+	payloadMap["client_id"] = clientId
+	payloadMap["client_secret"] = clientSecret
+	payloadMap["audience"] = audience
+	payloadMap["grant_type"] = grantType
+	payload, _ := json.Marshal(payloadMap)
 
-	auth0_req, err := http.NewRequest("POST", access_token_url, strings.NewReader(string(payload)))
+	auth0Req, err := http.NewRequest("POST", accessTokenUrl, strings.NewReader(string(payload)))
 	if err != nil {
 		panic(err)
 	}
-	auth0_req.Header.Add("content-type", "application/json")
-	auth0_res, err := http.DefaultClient.Do(auth0_req)
+	auth0Req.Header.Add("content-type", "application/json")
+	auth0Res, err := http.DefaultClient.Do(auth0Req)
 	if err != nil {
 		panic(err)
 	}
-	defer auth0_res.Body.Close()
-	auth0_body, _ := ioutil.ReadAll(auth0_res.Body)
-	var auth0_fields map[string]interface{}
-	err = json.Unmarshal(auth0_body, &auth0_fields)
+	defer auth0Res.Body.Close()
+	auth0Body, _ := ioutil.ReadAll(auth0Res.Body)
+	var auth0Fields map[string]interface{}
+	err = json.Unmarshal(auth0Body, &auth0Fields)
 	if err != nil {
-		fmt.Println(auth0_body)
+		fmt.Println(auth0Body)
 		panic(err)
 	}
 
-	access_token := fmt.Sprintf("%s %s", auth0_fields["token_type"], auth0_fields["access_token"])
-	ContextSet("access_token", access_token)
+	accessToken := fmt.Sprintf("%s %s", auth0Fields["token_type"], auth0Fields["access_token"])
+	ContextSet("access_token", accessToken)
 
 	if fullJson {
-		return string(auth0_body)
+		return string(auth0Body)
 	} else {
-		return access_token
+		return accessToken
 	}
 
 }

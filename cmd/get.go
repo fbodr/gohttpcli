@@ -35,16 +35,16 @@ var getCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var token string
 
-		access_token_url, _ := rootCmd.Flags().GetString("access_token_url")
-		client_id, _ := rootCmd.Flags().GetString("client_id")
-		client_secret, _ := rootCmd.Flags().GetString("client_secret")
+		accessTokenUrl, _ := rootCmd.Flags().GetString("access_token_url")
+		clientId, _ := rootCmd.Flags().GetString("client_id")
+		clientSecret, _ := rootCmd.Flags().GetString("client_secret")
 		audience, _ := rootCmd.Flags().GetString("audience")
-		grant_type, _ := rootCmd.Flags().GetString("grant_type")
+		grantType, _ := rootCmd.Flags().GetString("grant_type")
 
 		if lib.ContextHasKey("access_token") {
 			token = lib.ContextGetValue("access_token")
 		} else {
-			token = lib.GetToken(access_token_url, client_id, client_secret, audience, grant_type, false)
+			token = lib.GetToken(accessTokenUrl, clientId, clientSecret, audience, grantType, false)
 		}
 
 		makeRequest(token, args[0])
