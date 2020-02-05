@@ -1,4 +1,4 @@
-package oauth
+package lib
 
 import (
 	"encoding/json"
@@ -41,10 +41,14 @@ func GetToken(
 		fmt.Println(auth0_body)
 		panic(err)
 	}
+
+	access_token := fmt.Sprintf("%s %s", auth0_fields["token_type"], auth0_fields["access_token"])
+	ContextSet("access_token", access_token)
+
 	if fullJson {
 		return string(auth0_body)
 	} else {
-		return fmt.Sprintf("%s %s", auth0_fields["token_type"], auth0_fields["access_token"])
+		return access_token
 	}
 
 }

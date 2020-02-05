@@ -18,8 +18,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/fbodr/gohttpcli/lib"
-
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // getTokenCmd represents the getToken command
@@ -28,37 +28,28 @@ var getTokenCmd = &cobra.Command{
 	Short: "get an authentication token from oauth provider",
 	Long:  `get an authentication token from oauth provider`,
 	Run: func(cmd *cobra.Command, args []string) {
-		access_token_url, _ := cmd.Flags().GetString("access_token_url")
-		client_id, _ := cmd.Flags().GetString("client_id")
-		client_secret, _ := cmd.Flags().GetString("client_secret")
-		audience, _ := cmd.Flags().GetString("audience")
-		grant_type, _ := cmd.Flags().GetString("grant_type")
-		verbose, _ := cmd.Flags().GetBool("verbose")
-		if verbose {
+		access_token_url := viper.GetString("access_token_url")
+		client_id := viper.GetString("client_id")
+		client_secret := viper.GetString("client_secret")
+		audience := viper.GetString("audience")
+		grant_type := viper.GetString("grant_type")
+		printAsJson := false
+
+		if isVerbose {
 			fmt.Printf("access_token_url = %s\n", access_token_url)
 			fmt.Printf("client_id = %s\n", client_id)
 			fmt.Printf("client_secret = %s\n", client_secret)
 			fmt.Printf("audience = %s\n", audience)
 			fmt.Printf("grant_type = %s\n", grant_type)
-			fmt.Println(oauth.GetToken(access_token_url, client_id, client_secret, audience, grant_type, true))
-		} else {
-			fmt.Println(oauth.GetToken(access_token_url, client_id, client_secret, audience, grant_type, false))
+			printAsJson = true
 		}
+
+		accessToken := lib.GetToken(access_token_url, client_id, client_secret, audience, grant_type, printAsJson)
+		fmt.Println(accessToken)
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(getTokenCmd)
-
-	getTokenCmd.Flags().String("access_token_url", "", "access_token_url")
-	getTokenCmd.Flags().String("client_id", "", "client_id")
-	getTokenCmd.Flags().String("client_secret", "", "client_secret")
-	getTokenCmd.Flags().String("audience", "", "audience")
-	getTokenCmd.Flags().String("grant_type", "client_credentials", "grant_type")
-	getTokenCmd.Flags().BoolP("verbose", "v", false, "verbose output")
-
-	getTokenCmd.MarkFlagRequired("access_token_url")
-	getTokenCmd.MarkFlagRequired("client_id")
-	getTokenCmd.MarkFlagRequired("client_secret")
-	getTokenCmd.MarkFlagRequired("audience")
 }

@@ -23,15 +23,15 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/fbodr/gohttpcli/lib"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 	"os"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+var isVerbose bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -46,6 +46,8 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	isVerbose, _ = rootCmd.Flags().GetBool("verbose")
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -59,55 +61,47 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gohttpcli.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gohttpcli/config.yaml)")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().String("access_token_url", "", "access_token_url")
+	rootCmd.PersistentFlags().String("client_id", "", "client_id")
+	rootCmd.PersistentFlags().String("client_secret", "", "client_secret")
+	rootCmd.PersistentFlags().String("audience", "", "audience")
+	rootCmd.PersistentFlags().String("grant_type", "client_credentials", "grant_type")
+
+	rootCmd.MarkFlagRequired("access_token_url")
+	rootCmd.MarkFlagRequired("client_id")
+	rootCmd.MarkFlagRequired("client_secret")
+	rootCmd.MarkFlagRequired("audience")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	appCfgPath := os.Getenv("HOME") + "/.gohttpcli"
+	_, err := os.Stat(appCfgPath)
+	if err != nil {
+		/* dir does not exists */
+		os.Mkdir(os.Getenv("HOME")+"/.gohttpcli", 0777)
+	}
+
+	viper.SetConfigType("yaml")
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".gohttpcli" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".gohttpcli")
+		viper.AddConfigPath(appCfgPath)
+		viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		/*fmt.Println("Using config file:", viper.ConfigFileUsed())*/
+	err = viper.ReadInConfig()
+	if err != nil {
+		panic(err)
 	}
 
-	postInitCommands(rootCmd.Commands())
-}
-
-func postInitCommands(commands []*cobra.Command) {
-	for _, cmd := range commands {
-		presetRequiredFlags(cmd)
-		if cmd.HasSubCommands() {
-			postInitCommands(cmd.Commands())
-		}
-	}
-}
-
-func presetRequiredFlags(cmd *cobra.Command) {
-	viper.BindPFlags(cmd.Flags())
-	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
-			cmd.Flags().Set(f.Name, viper.GetString(f.Name))
-		}
-	})
+	viper.BindPFlags(rootCmd.Flags())
+	lib.ContextInit(appCfgPath)
 }
